@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { User } from "@/types";
 
-export function useAuth() {
+export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,4 +51,4 @@ export function useAuth() {
   };
 
   return { user, isLoading, login, logout };
-}
+};

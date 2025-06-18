@@ -1,7 +1,3 @@
-import type React from "react";
-
-import { useState } from "react";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,64 +9,35 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload } from "lucide-react";
-import type { Document } from "@/types";
-import { generateMockContent } from "@/data";
+import { AllowedType } from "@/lib/consts";
+import { useUpload } from "@/hooks/useUpload";
+// import { useDocuments } from "@/hooks/useDocuments";
 
-interface DocumentUploadProps {
-  onUpload: (doc: Document) => void;
-}
-
-export function DocumentUpload({ onUpload }: DocumentUploadProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
+export function DocumentUpload() {
+  const { getUploadUrlMutation, uploadFileMutation } = useUpload();
+  // const { createDocumentMutation } = useDocuments();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      const errorMessage = "Only PDF and DOCX files are allowed";
-      setUploadError(errorMessage);
-      toast.error(errorMessage);
-      return;
-    }
+    const uploadUrl = await getUploadUrlMutation.mutateAsync({
+      filename: file.name,
+      type: file.type as AllowedType,
+    });
 
-    setIsUploading(true);
-    setUploadError("");
+    const uploadedFile = await uploadFileMutation.mutateAsync({
+      file,
+      url: uploadUrl,
+    });
 
-    const loadingToast = toast.loading(`Uploading ${file.name}...`);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const newDoc: Document = {
-        id: Date.now().toString(),
-        filename: file.name,
-        uploadDate: new Date().toISOString(),
-        content: generateMockContent(
-          file.name,
-          file.type.includes("pdf") ? "pdf" : "docx"
-        ),
-        type: file.type.includes("pdf") ? "pdf" : "docx",
-      };
-
-      onUpload(newDoc);
-
-      toast.dismiss(loadingToast);
-      toast.success(`${file.name} uploaded successfully!`);
-
-      e.target.value = "";
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error(error instanceof Error ? error.message : "Unknown error");
-    } finally {
-      setIsUploading(false);
-    }
+    console.log(uploadedFile);
   };
+
+  const isUploading =
+    getUploadUrlMutation.isPending || uploadFileMutation.isPending;
+
+  const error = getUploadUrlMutation.isError || uploadFileMutation.isError;
 
   return (
     <Card>
@@ -96,9 +63,9 @@ export function DocumentUpload({ onUpload }: DocumentUploadProps) {
             </p>
           </div>
 
-          {uploadError && (
+          {error && (
             <Alert variant="destructive">
-              <AlertDescription>{uploadError}</AlertDescription>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 

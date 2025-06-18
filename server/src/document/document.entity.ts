@@ -19,6 +19,8 @@ export class Document {
   @Column('text')
   s3Url: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   uploadedAt: Date;
 }

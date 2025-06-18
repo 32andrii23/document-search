@@ -10,7 +10,7 @@ import { SearchInterface } from "@/components/SearchInterface";
 
 const App = () => {
   const { user, isLoading, login, logout } = useAuth();
-  const { documents, addDocument, deleteDocument } = useDocuments(user);
+  const { documents, deleteDocument } = useDocuments();
 
   const handleLogout = () => {
     logout();
@@ -38,7 +38,7 @@ const App = () => {
               </TabsContent>
 
               <TabsContent value="upload">
-                <DocumentUpload onUpload={addDocument} />
+                <DocumentUpload />
               </TabsContent>
 
               <TabsContent value="manage">

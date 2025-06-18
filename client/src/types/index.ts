@@ -1,9 +1,9 @@
 export interface Document {
-  id: string;
+  id: number;
+  userEmail: string;
   filename: string;
-  uploadDate: string;
-  content: string;
-  type: "pdf" | "docx";
+  s3Url: string;
+  uploadedAt: Date;
 }
 
 export interface SearchResult {

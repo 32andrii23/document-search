@@ -8,7 +8,10 @@ export class UploadController {
   @Get('upload-url')
   async getUploadUrl(
     @Query('filename') filename: string,
-    @Query('type') type: string,
+    @Query('type')
+    type:
+      | 'application/pdf'
+      | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ) {
     const url = await this.uploadService.generateUploadUrl(filename, type);
     return { url };

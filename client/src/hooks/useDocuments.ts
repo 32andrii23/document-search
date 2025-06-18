@@ -1,46 +1,37 @@
-import { useState, useEffect } from "react";
-import type { Document, User } from "@/types";
+import { useState } from "react";
+import type { Document } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { axiosClient } from "@/lib/axios";
+import { toast } from "sonner";
 
-export function useDocuments(user: User | null) {
+export const useDocuments = () => {
+  const queryClient = useQueryClient();
+
   const [documents, setDocuments] = useState<Document[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      loadUserDocuments(user.email);
-    } else {
-      setDocuments([]);
-    }
-  }, [user]);
-
-  const loadUserDocuments = (userEmail: string) => {
-    const savedDocs = localStorage.getItem(`fileSearcher_docs_${userEmail}`);
-    if (savedDocs) {
-      setDocuments(JSON.parse(savedDocs));
-    }
+  const createDocument = async (doc: Document) => {
+    const response = await axiosClient.post("/documents", doc);
+    return response.data;
   };
 
-  const saveUserDocuments = (userEmail: string, docs: Document[]) => {
-    localStorage.setItem(
-      `fileSearcher_docs_${userEmail}`,
-      JSON.stringify(docs)
-    );
+  const createDocumentMutation = useMutation({
+    mutationFn: createDocument,
+    onSuccess: () => {
+      toast.success("Document created successfully");
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create document"
+      );
+    },
+  });
+
+  const deleteDocument = (docId: string) => {};
+
+  return {
+    documents,
+    createDocumentMutation,
+    deleteDocument,
   };
-
-  const addDocument = (doc: Document) => {
-    if (!user) return;
-
-    const updatedDocs = [...documents, doc];
-    setDocuments(updatedDocs);
-    saveUserDocuments(user.email, updatedDocs);
-  };
-
-  const deleteDocument = (docId: string) => {
-    if (!user) return;
-
-    const updatedDocs = documents.filter((doc) => doc.id !== docId);
-    setDocuments(updatedDocs);
-    saveUserDocuments(user.email, updatedDocs);
-  };
-
-  return { documents, addDocument, deleteDocument };
-}
+};
