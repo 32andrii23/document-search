@@ -29,7 +29,7 @@ export function useAuth() {
       setUser(userData);
       localStorage.setItem("fileSearcher_user", JSON.stringify(userData));
 
-      toast.success(`Welcome back, ${email}!`);
+      toast.success(`Welcome, ${email}!`);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
