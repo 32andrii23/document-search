@@ -1,10 +1,14 @@
-import { useAuth } from "@/hooks/useAuth";
 import { AuthForm } from "@/components/AuthForm";
+import { DocumentUpload } from "@/components/DocumentUpload";
 import { Toaster } from "@/components/ui/sonner";
-import { Header } from "./components/Header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { useDocuments } from "@/hooks/useDocuments";
+import { Header } from "@/components/Header";
 
 const App = () => {
   const { user, isLoading, login, logout } = useAuth();
+  const { documents, addDocument, deleteDocument } = useDocuments(user);
 
   const handleLogout = () => {
     logout();
@@ -22,6 +26,24 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header user={user} onLogout={handleLogout} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="search" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="search">Search Documents</TabsTrigger>
+            <TabsTrigger value="upload">Upload Document</TabsTrigger>
+            <TabsTrigger value="manage">Manage Documents</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="search">search</TabsContent>
+
+          <TabsContent value="upload">
+            <DocumentUpload onUpload={addDocument} />
+          </TabsContent>
+
+          <TabsContent value="manage">documents</TabsContent>
+        </Tabs>
+      </div>
 
       <Toaster />
     </div>

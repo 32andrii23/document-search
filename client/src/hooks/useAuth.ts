@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { User } from "@/types";
@@ -19,7 +17,6 @@ export function useAuth() {
     setIsLoading(true);
 
     try {
-      // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (!email.includes("@")) {
