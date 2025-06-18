@@ -1,28 +1,38 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class UploadService {
-  private readonly s3Client: S3Client;
+  private s3: S3Client;
+  private bucketName = process.env.AWS_S3_BUCKET_NAME;
 
-  constructor(private readonly configService: ConfigService) {
-    this.s3Client = new S3Client({
-      region: this.configService.get('AWS_REGION'),
+  constructor() {
+    this.s3 = new S3Client({
+      region: process.env.AWS_REGION,
     });
   }
 
-  async uploadFile(fileName: string, fileBuffer: Buffer) {
-    await this.s3Client.send(
-      new PutObjectCommand({
-        Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
-        Key: fileName,
-        Body: fileBuffer,
-      }),
-    );
+  async generateUploadUrl(key: string, contentType: string): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: contentType,
+    });
 
-    return {
-      url: `https://${this.configService.get('AWS_S3_BUCKET_NAME')}.s3.amazonaws.com/${fileName}`,
-    };
+    return await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
+  }
+
+  async generateDownloadUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
   }
 }

@@ -1,37 +1,22 @@
-import {
-  Controller,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  ParseFilePipe,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Controller, Get, Query } from '@nestjs/common';
 import { UploadService } from './upload.service';
 
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: 5 * 1024 * 1024, // 5MB
-            message: 'File size cannot exceed 5MB',
-          }),
-          new FileTypeValidator({
-            fileType: /(pdf|doc|docx)$/,
-          }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
+  @Get('upload-url')
+  async getUploadUrl(
+    @Query('filename') filename: string,
+    @Query('type') type: string,
   ) {
-    return this.uploadService.uploadFile(file.originalname, file.buffer);
+    const url = await this.uploadService.generateUploadUrl(filename, type);
+    return { url };
+  }
+
+  @Get('download-url')
+  async getDownloadUrl(@Query('filename') filename: string) {
+    const url = await this.uploadService.generateDownloadUrl(filename);
+    return { url };
   }
 }
