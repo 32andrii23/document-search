@@ -10,14 +10,14 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, Loader2 } from "lucide-react";
 import { AllowedType } from "@/lib/consts";
-import { useUpload } from "@/hooks/useUpload";
+import { useS3 } from "@/hooks/useS3";
 import { useAuth } from "@/hooks/useAuth";
 import { v4 as uuidv4 } from "uuid";
 import { useMutateDocuments } from "@/hooks/useMutateDocuments";
 
 export function DocumentUpload() {
   const { user } = useAuth();
-  const { getUploadUrlMutation, uploadFileMutation } = useUpload();
+  const { getUploadUrlMutation, uploadFileMutation } = useS3();
   const { createDocumentMutation } = useMutateDocuments();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,27 +26,31 @@ export function DocumentUpload() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const uploadFileName = `${user.email}-${uuidv4()}-${file.name}`;
+    try {
+      const uploadFileName = `${user.email}-${uuidv4()}-${file.name}`;
 
-    const uploadUrl = await getUploadUrlMutation.mutateAsync({
-      filename: uploadFileName,
-      type: file.type as AllowedType,
-    });
+      const uploadUrl = await getUploadUrlMutation.mutateAsync({
+        filename: uploadFileName,
+        type: file.type as AllowedType,
+      });
 
-    await uploadFileMutation.mutateAsync({
-      file,
-      url: uploadUrl,
-    });
+      await uploadFileMutation.mutateAsync({
+        file,
+        url: uploadUrl,
+      });
 
-    const s3Url = `https://${
-      import.meta.env.VITE_AWS_S3_BUCKET_NAME
-    }.s3.amazonaws.com/${uploadFileName}`;
+      const s3Url = `https://${
+        import.meta.env.VITE_AWS_S3_BUCKET_NAME
+      }.s3.amazonaws.com/${uploadFileName}`;
 
-    await createDocumentMutation.mutateAsync({
-      filename: uploadFileName,
-      s3Url,
-      userEmail: user.email,
-    });
+      await createDocumentMutation.mutateAsync({
+        filename: uploadFileName,
+        s3Url,
+        userEmail: user.email,
+      });
+    } catch (error) {
+      console.error("Error uploading document:", error);
+    }
   };
 
   const isUploading =

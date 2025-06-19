@@ -3,6 +3,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -17,7 +18,7 @@ export class UploadService {
     });
   }
 
-  async generateUploadUrl(key: string, contentType: string): Promise<string> {
+  async generateUploadUrl(key: string, contentType: string) {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
@@ -27,7 +28,16 @@ export class UploadService {
     return await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
   }
 
-  async generateDownloadUrl(key: string): Promise<string> {
+  async generateDeleteUrl(key: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
+  }
+
+  async generateDownloadUrl(key: string) {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,

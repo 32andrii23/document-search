@@ -4,7 +4,7 @@ import { AllowedType } from "@/lib/consts";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
-export const useUpload = () => {
+export const useS3 = () => {
   const getUploadUrl = async (filename: string, type: AllowedType) => {
     if (!Object.values(AllowedType).includes(type)) {
       toast.error("Invalid file type");
@@ -45,5 +45,35 @@ export const useUpload = () => {
     },
   });
 
-  return { getUploadUrlMutation, uploadFileMutation };
+  const getDeleteUrl = async (filename: string) => {
+    const response = await axiosClient.get(
+      `/upload/delete-url?filename=${filename}`
+    );
+    return response.data.url;
+  };
+
+  const getDeleteUrlMutation = useMutation({
+    mutationFn: getDeleteUrl,
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to get delete URL"
+      );
+    },
+  });
+
+  const deleteFile = async (url: string) => {
+    const response = await axios.delete(url);
+    return response.data;
+  };
+
+  const deleteFileMutation = useMutation({
+    mutationFn: deleteFile,
+  });
+
+  return {
+    getUploadUrlMutation,
+    uploadFileMutation,
+    getDeleteUrlMutation,
+    deleteFileMutation,
+  };
 };

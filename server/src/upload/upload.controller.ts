@@ -17,6 +17,12 @@ export class UploadController {
     return { url };
   }
 
+  @Get('delete-url')
+  async getDeleteUrl(@Query('filename') filename: string) {
+    const url = await this.uploadService.generateDeleteUrl(filename);
+    return { url };
+  }
+
   @Get('download-url')
   async getDownloadUrl(@Query('filename') filename: string) {
     const url = await this.uploadService.generateDownloadUrl(filename);

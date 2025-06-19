@@ -16,4 +16,8 @@ export class DocumentService {
   async createDocument(document: Document) {
     return this.documentRepository.save(document);
   }
+
+  async deleteDocument(id: string) {
+    return this.documentRepository.delete(id);
+  }
 }

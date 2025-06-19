@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Query, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Query,
+  Get,
+  Delete,
+  Param,
+} from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { Document } from './document.entity';
 
@@ -14,5 +22,10 @@ export class DocumentController {
   @Post()
   async create(@Body() document: Document) {
     return await this.documentService.createDocument(document);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.documentService.deleteDocument(id);
   }
 }

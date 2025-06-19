@@ -24,10 +24,25 @@ export const useMutateDocuments = () => {
     },
   });
 
-  const deleteDocument = (docId: string) => {};
+  const deleteDocument = async (docId: string) => {
+    await axiosClient.delete(`/documents/${docId}`);
+  };
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: deleteDocument,
+    onSuccess: () => {
+      toast.success("Document deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete document"
+      );
+    },
+  });
 
   return {
     createDocumentMutation,
-    deleteDocument,
+    deleteDocumentMutation,
   };
 };

@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,21 +7,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Trash2, Calendar } from "lucide-react";
-import { toast } from "sonner";
-import type { Document } from "@/types";
 import { useMutateDocuments } from "@/hooks/useMutateDocuments";
 import { useQueryDocuments } from "@/hooks/useQueryDocuments";
+import { useS3 } from "@/hooks/useS3";
+import type { Document } from "@/types";
+import { Calendar, FileText, Trash2 } from "lucide-react";
 
 export function DocumentList() {
-  const { deleteDocument } = useMutateDocuments();
+  const { getDeleteUrlMutation, deleteFileMutation } = useS3();
+  const { deleteDocumentMutation } = useMutateDocuments();
   const { data: documents } = useQueryDocuments();
 
-  const handleDelete = (doc: Document) => {
-    deleteDocument(doc.id.toString());
-    toast.success(`${doc.filename} deleted successfully`);
+  const handleDelete = async (doc: Document) => {
+    try {
+      const deleteUrl = await getDeleteUrlMutation.mutateAsync(doc.filename);
+
+      await deleteFileMutation.mutateAsync(deleteUrl);
+
+      await deleteDocumentMutation.mutateAsync(doc.id.toString());
+    } catch (error) {
+      console.error("Error deleting document:", error);
+    }
   };
 
   return (
