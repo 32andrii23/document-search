@@ -11,7 +11,7 @@ export const useS3 = () => {
       return;
     }
     const response = await axiosClient.get(
-      `/upload/upload-url?filename=${filename}&type=${type}`
+      `/upload/upload-url?key=${filename}&contentType=${type}`
     );
     return response.data.url;
   };
@@ -47,7 +47,7 @@ export const useS3 = () => {
 
   const getDeleteUrl = async (filename: string) => {
     const response = await axiosClient.get(
-      `/upload/delete-url?filename=${filename}`
+      `/upload/delete-url?key=${filename}`
     );
     return response.data.url;
   };

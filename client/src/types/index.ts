@@ -3,7 +3,7 @@ export interface Document {
   userEmail: string;
   filename: string;
   s3Url: string;
-  uploadedAt: Date;
+  uploadedAt: string;
 }
 
 export interface SearchResult {

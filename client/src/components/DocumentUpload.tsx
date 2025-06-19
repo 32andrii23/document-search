@@ -43,10 +43,13 @@ export function DocumentUpload() {
         import.meta.env.VITE_AWS_S3_BUCKET_NAME
       }.s3.amazonaws.com/${uploadFileName}`;
 
+      const now = new Date();
+
       await createDocumentMutation.mutateAsync({
         filename: uploadFileName,
         s3Url,
         userEmail: user.email,
+        uploadedAt: now.toISOString(),
       });
     } catch (error) {
       console.error("Error uploading document:", error);

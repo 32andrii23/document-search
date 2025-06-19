@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export const useMutateDocuments = () => {
   const queryClient = useQueryClient();
 
-  const createDocument = async (doc: Omit<Document, "id" | "uploadedAt">) => {
+  const createDocument = async (doc: Omit<Document, "id">) => {
     const response = await axiosClient.post("/documents", doc);
     return response.data;
   };
