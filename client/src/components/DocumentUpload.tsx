@@ -8,36 +8,56 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { AllowedType } from "@/lib/consts";
 import { useUpload } from "@/hooks/useUpload";
-// import { useDocuments } from "@/hooks/useDocuments";
+import { useAuth } from "@/hooks/useAuth";
+import { v4 as uuidv4 } from "uuid";
+import { useDocuments } from "@/hooks/useDocuments";
 
 export function DocumentUpload() {
+  const { user } = useAuth();
   const { getUploadUrlMutation, uploadFileMutation } = useUpload();
-  // const { createDocumentMutation } = useDocuments();
+  const { createDocumentMutation } = useDocuments();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return;
+
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const uploadFileName = `${user.email}-${uuidv4()}-${file.name}`;
+
     const uploadUrl = await getUploadUrlMutation.mutateAsync({
-      filename: file.name,
+      filename: uploadFileName,
       type: file.type as AllowedType,
     });
 
-    const uploadedFile = await uploadFileMutation.mutateAsync({
+    await uploadFileMutation.mutateAsync({
       file,
       url: uploadUrl,
     });
 
-    console.log(uploadedFile);
+    const s3Url = `https://${
+      import.meta.env.VITE_AWS_S3_BUCKET_NAME
+    }.s3.amazonaws.com/${uploadFileName}`;
+
+    await createDocumentMutation.mutateAsync({
+      filename: uploadFileName,
+      s3Url,
+      userEmail: user.email,
+    });
   };
 
   const isUploading =
-    getUploadUrlMutation.isPending || uploadFileMutation.isPending;
+    getUploadUrlMutation.isPending ||
+    uploadFileMutation.isPending ||
+    createDocumentMutation.isPending;
 
-  const error = getUploadUrlMutation.isError || uploadFileMutation.isError;
+  const error =
+    getUploadUrlMutation.isError ||
+    uploadFileMutation.isError ||
+    createDocumentMutation.isError;
 
   return (
     <Card>
@@ -72,8 +92,9 @@ export function DocumentUpload() {
           {isUploading && (
             <Alert>
               <Upload className="h-4 w-4" />
-              <AlertDescription>
-                Processing document... Please wait.
+              <AlertDescription className="flex items-center gap-2">
+                Processing document...{" "}
+                <Loader2 className="h-4 w-4 animate-spin" />
               </AlertDescription>
             </Alert>
           )}

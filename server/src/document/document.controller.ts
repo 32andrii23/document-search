@@ -2,7 +2,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { Document } from './document.entity';
 
-@Controller('document')
+@Controller('documents')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 

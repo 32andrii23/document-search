@@ -1,9 +1,9 @@
 export interface Document {
-  id: number;
+  // id: number;
   userEmail: string;
   filename: string;
   s3Url: string;
-  uploadedAt: Date;
+  // uploadedAt: Date;
 }
 
 export interface SearchResult {
