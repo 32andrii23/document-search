@@ -12,7 +12,7 @@ import { useMutateDocuments } from "@/hooks/useMutateDocuments";
 import { useQueryDocuments } from "@/hooks/useQueryDocuments";
 import { useS3 } from "@/hooks/useS3";
 import type { Document } from "@/types";
-import { Calendar, FileText, Trash2 } from "lucide-react";
+import { Calendar, FileText, Trash2, Loader2 } from "lucide-react";
 
 export function DocumentList() {
   const { getDeleteUrlMutation, deleteFileMutation } = useS3();
@@ -30,6 +30,11 @@ export function DocumentList() {
       console.error("Error deleting document:", error);
     }
   };
+
+  const isDeleting =
+    getDeleteUrlMutation.isPending ||
+    deleteFileMutation.isPending ||
+    deleteDocumentMutation.isPending;
 
   return (
     <Card>
@@ -70,8 +75,13 @@ export function DocumentList() {
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(doc)}
+                    disabled={isDeleting}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {isDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               ))}
