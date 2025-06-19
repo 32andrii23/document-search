@@ -9,6 +9,10 @@ export class DocumentService {
     private documentRepository: Repository<Document>,
   ) {}
 
+  async getDocuments(userEmail: string) {
+    return this.documentRepository.find({ where: { userEmail } });
+  }
+
   async createDocument(document: Document) {
     return this.documentRepository.save(document);
   }

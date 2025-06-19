@@ -3,14 +3,12 @@ import { DocumentUpload } from "@/components/DocumentUpload";
 import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
-import { useDocuments } from "@/hooks/useDocuments";
 import { Header } from "@/components/Header";
 import { DocumentList } from "@/components/DocumentsList";
 import { SearchInterface } from "@/components/SearchInterface";
 
 const App = () => {
   const { user, isLoading, login, logout } = useAuth();
-  const { documents, deleteDocument } = useDocuments();
 
   const handleLogout = () => {
     logout();
@@ -31,10 +29,7 @@ const App = () => {
               </TabsList>
 
               <TabsContent value="search">
-                <SearchInterface
-                  documents={documents}
-                  onDeleteDocument={deleteDocument}
-                />
+                <SearchInterface />
               </TabsContent>
 
               <TabsContent value="upload">
@@ -42,7 +37,7 @@ const App = () => {
               </TabsContent>
 
               <TabsContent value="manage">
-                <DocumentList documents={documents} onDelete={deleteDocument} />
+                <DocumentList />
               </TabsContent>
             </Tabs>
           </div>

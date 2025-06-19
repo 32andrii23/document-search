@@ -13,12 +13,12 @@ import { AllowedType } from "@/lib/consts";
 import { useUpload } from "@/hooks/useUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { v4 as uuidv4 } from "uuid";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useMutateDocuments } from "@/hooks/useMutateDocuments";
 
 export function DocumentUpload() {
   const { user } = useAuth();
   const { getUploadUrlMutation, uploadFileMutation } = useUpload();
-  const { createDocumentMutation } = useDocuments();
+  const { createDocumentMutation } = useMutateDocuments();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user) return;

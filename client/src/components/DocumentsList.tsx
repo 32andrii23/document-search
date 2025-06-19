@@ -11,26 +11,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import type { Document } from "@/types";
+import { useMutateDocuments } from "@/hooks/useMutateDocuments";
+import { useQueryDocuments } from "@/hooks/useQueryDocuments";
 
-interface DocumentListProps {
-  documents: Document[];
-  onDelete: (docId: string) => void;
-}
+export function DocumentList() {
+  const { deleteDocument } = useMutateDocuments();
+  const { data: documents } = useQueryDocuments();
 
-export function DocumentList({ documents, onDelete }: DocumentListProps) {
   const handleDelete = (doc: Document) => {
-    onDelete(doc.id);
+    deleteDocument(doc.id.toString());
     toast.success(`${doc.filename} deleted successfully`);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your Documents ({documents.length})</CardTitle>
+        <CardTitle>Your Documents ({documents?.data.length})</CardTitle>
         <CardDescription>Manage your uploaded documents</CardDescription>
       </CardHeader>
       <CardContent>
-        {documents.length === 0 ? (
+        {documents?.data.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No documents uploaded yet</p>
@@ -38,7 +38,7 @@ export function DocumentList({ documents, onDelete }: DocumentListProps) {
         ) : (
           <ScrollArea className="h-96">
             <div className="space-y-3">
-              {documents.map((doc) => (
+              {documents?.data.map((doc) => (
                 <div
                   key={doc.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -50,10 +50,10 @@ export function DocumentList({ documents, onDelete }: DocumentListProps) {
                       <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {new Date(doc.uploadDate).toLocaleDateString()}
+                          {new Date(doc.uploadedAt).toLocaleDateString()}
                         </span>
                         <Badge variant="outline" className="text-xs">
-                          {doc.type.toUpperCase()}
+                          {doc.s3Url.split(".").pop()?.toUpperCase()}
                         </Badge>
                       </div>
                     </div>

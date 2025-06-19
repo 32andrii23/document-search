@@ -1,15 +1,12 @@
-import { useState } from "react";
 import type { Document } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 
-export const useDocuments = () => {
+export const useMutateDocuments = () => {
   const queryClient = useQueryClient();
 
-  const [documents, setDocuments] = useState<Document[]>([]);
-
-  const createDocument = async (doc: Document) => {
+  const createDocument = async (doc: Omit<Document, "id" | "uploadedAt">) => {
     const response = await axiosClient.post("/documents", doc);
     return response.data;
   };
@@ -30,7 +27,6 @@ export const useDocuments = () => {
   const deleteDocument = (docId: string) => {};
 
   return {
-    documents,
     createDocumentMutation,
     deleteDocument,
   };
