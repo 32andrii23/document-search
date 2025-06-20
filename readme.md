@@ -28,7 +28,7 @@ This project provides a comprehensive solution for managing and searching docume
 
 ## 🛠️ Tech Stack
 
-### Frontend (`client/`)
+### Frontend
 
 *   **React 19**
 *   **Vite** (build tool)
