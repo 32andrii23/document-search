@@ -2,6 +2,8 @@
 
 A robust full-stack file searcher application enabling users to upload PDF and Word documents, index their content, and perform full-text searches with highlighting. Built with a modern React frontend and a scalable AWS serverless backend.
 
+![Search Example](./search-example.png)
+
 ## 🔍 Description
 
 This project provides a comprehensive solution for managing and searching document content. Users can securely upload PDF and Word files, which are then processed and indexed to allow for powerful text-based searches. The application features document listing, search with text highlighting, and deletion capabilities, all powered by AWS's serverless architecture.
