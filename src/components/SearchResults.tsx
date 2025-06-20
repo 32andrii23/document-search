@@ -23,7 +23,15 @@ export function SearchResults({ results }: SearchResultsProps) {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <FileText className="h-4 w-4" />
-                    <span className="font-medium">{result.filename}</span>
+                    <a
+                      href={`https://${
+                        import.meta.env.VITE_AWS_S3_BUCKET_NAME
+                      }.s3.amazonaws.com/${result.filename}`}
+                      target="_blank"
+                      className="font-medium hover:underline"
+                    >
+                      {result.filename}
+                    </a>
                     <Badge variant="secondary">{result.score.toFixed(2)}</Badge>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-500">

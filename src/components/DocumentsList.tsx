@@ -65,7 +65,13 @@ export function DocumentList() {
                   <div className="flex items-center space-x-3">
                     <FileText className="h-5 w-5 text-blue-600" />
                     <div>
-                      <p className="font-medium">{doc.filename}</p>
+                      <a
+                        className="font-medium hover:underline"
+                        href={doc.s3Url}
+                        target="_blank"
+                      >
+                        {doc.filename}
+                      </a>
                       <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <Calendar className="h-3 w-3" />
                         <span>
