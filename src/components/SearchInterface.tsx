@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,77 +12,24 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { SearchResults } from "@/components/SearchResults";
-import type { Document, SearchResult } from "@/types";
+import { useSearch } from "@/hooks/useSearch";
+import type { SearchResult as ApiSearchResult } from "@/hooks/useSearch";
 
-interface SearchInterfaceProps {
-  documents: Document[];
-  onDeleteDocument: (docId: string) => void;
-}
-
-export function SearchInterface({
-  documents,
-  onDeleteDocument,
-}: SearchInterfaceProps) {
+export function SearchInterface() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const { data, isLoading, isError } = useSearch(submittedQuery);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
-      setSearchResults([]);
+      setSubmittedQuery("");
+      toast.info("Please enter a search query");
       return;
     }
-
-    const results: SearchResult[] = documents
-      .filter(
-        (doc) =>
-          doc.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          doc.filename.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .map((doc) => {
-        const content = doc.content.toLowerCase();
-        const query = searchQuery.toLowerCase();
-        const highlights: string[] = [];
-
-        // Find highlights in content
-        let index = content.indexOf(query);
-        while (index !== -1 && highlights.length < 3) {
-          const start = Math.max(0, index - 30);
-          const end = Math.min(doc.content.length, index + query.length + 30);
-          const highlight = doc.content.substring(start, end);
-          highlights.push(highlight);
-          index = content.indexOf(query, index + 1);
-        }
-
-        return { document: doc, highlights };
-      });
-
-    setSearchResults(results);
-
-    // Show search result toast
-    if (results.length > 0) {
-      toast.success(
-        `Found ${results.length} result${
-          results.length === 1 ? "" : "s"
-        } for "${searchQuery}"`
-      );
-    } else {
-      toast.info(`No results found for "${searchQuery}"`);
-    }
+    setSubmittedQuery(searchQuery);
   };
 
-  const handleDeleteFromSearch = (docId: string) => {
-    const doc = documents.find((d) => d.id === docId);
-    onDeleteDocument(docId);
-
-    // Update search results
-    setSearchResults((prev) =>
-      prev.filter((result) => result.document.id !== docId)
-    );
-
-    if (doc) {
-      toast.success(`${doc.filename} deleted successfully`);
-    }
-  };
+  const results: ApiSearchResult[] = data?.data?.results || [];
 
   return (
     <div className="space-y-6">
@@ -103,23 +48,25 @@ export function SearchInterface({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
-            <Button onClick={handleSearch}>
+            <Button onClick={handleSearch} disabled={isLoading}>
               <Search className="h-4 w-4 mr-2" />
-              Search
+              {isLoading ? "Searching..." : "Search"}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {searchResults.length > 0 && (
-        <SearchResults
-          results={searchResults}
-          searchQuery={searchQuery}
-          onDeleteDocument={handleDeleteFromSearch}
-        />
+      {isError && (
+        <Alert>
+          <AlertDescription>
+            Error occurred while searching. Please try again.
+          </AlertDescription>
+        </Alert>
       )}
 
-      {searchQuery && searchResults.length === 0 && (
+      {results.length > 0 && <SearchResults results={results} />}
+
+      {submittedQuery && !isLoading && results.length === 0 && !isError && (
         <Alert>
           <AlertDescription>
             No documents found matching your search query.
