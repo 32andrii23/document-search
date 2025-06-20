@@ -17,7 +17,7 @@ import { Calendar, FileText, Trash2, Loader2 } from "lucide-react";
 export function DocumentList() {
   const { getDeleteUrlMutation, deleteFileMutation } = useS3();
   const { deleteDocumentMutation } = useMutateDocuments();
-  const { data: documents } = useQueryDocuments();
+  const { data: documents, isLoading } = useQueryDocuments();
 
   const handleDelete = async (doc: Document) => {
     try {
@@ -39,11 +39,17 @@ export function DocumentList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your Documents ({documents?.data.length})</CardTitle>
+        <CardTitle>
+          Your Documents ({isLoading ? "😁" : documents?.data.length})
+        </CardTitle>
         <CardDescription>Manage your uploaded documents</CardDescription>
       </CardHeader>
       <CardContent>
-        {documents?.data.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : documents?.data.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No documents uploaded yet</p>
