@@ -1,8 +1,33 @@
-# AWS React File Searcher 📄🔍
+# Document Search 📄🔍
 
-A robust full-stack file searcher application enabling users to upload PDF and Word documents, index their content, and perform full-text searches with highlighting. Built with a modern React frontend and a scalable AWS serverless backend.
+Upload PDF and Word documents, have their contents indexed automatically, and run full-text searches with highlighted matches. A React frontend on top of an event-driven AWS serverless backend.
 
 ![Search Example](./search-example.png)
+
+## 🏗️ Architecture
+
+```text
+ React (Amplify)
+       |
+       |  1. request presigned URL
+       v
+ API Gateway --> Lambda --> DynamoDB (document metadata)
+       |
+       |  2. direct browser upload
+       v
+     S3  --(object created notification)-->  SQS
+                                              |
+                                              v
+                                  Lambda (parse PDF / DOCX)
+                                              |
+                                              v
+                                    OpenSearch (full-text index)
+       ^
+       |  3. search query
+ API Gateway --> Lambda --> OpenSearch (highlighted hits)
+```
+
+SQS sits between S3 and the parser so a burst of uploads is absorbed rather than throttling Lambda, and a failed parse can be retried without losing the event.
 
 ## 🔍 Description
 
@@ -55,39 +80,46 @@ This project provides a comprehensive solution for managing and searching docume
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/andrew-dev-p/aws-react-file-searcher.git
-cd aws-react-file-searcher
+git clone https://github.com/32andrii23/document-search.git
+cd document-search
 ```
 
-### 2. Setup Frontend
+### 2. Install Dependencies
+
+The React app lives at the repository root, so there is no separate client directory:
 
 ```bash
-cd client
 npm install
 ```
 
-### 🧪 Running Locally
-
-### Frontend
+### 3. Configure Environment
 
 ```bash
-cd client
+cp .env.example .env
+```
+
+Then fill in the two values (see [Environment Variables](#-environment-variables) below).
+
+## 🧪 Running Locally
+
+```bash
 npm run dev
 ```
 
-### Backend
+The app expects a deployed backend. The AWS side is Lambda functions behind API Gateway plus an S3/SQS-triggered indexer, so there is no local server to start — point `VITE_API_URL` at a deployed API Gateway stage, or emulate it with AWS SAM CLI or the Serverless Framework.
 
-The backend primarily consists of AWS Lambda functions triggered by API Gateway and SQS. For local development, you would typically use AWS SAM CLI or Serverless Framework to emulate these services, but detailed local setup for the server is beyond the scope of this README.
+## 🔐 Environment Variables
 
-### 🔐 Environment Variables
+Copy `.env.example` to `.env` and set:
 
-```bash
-VITE_API_URL="https://2xbcyufzck.execute-api.us-east-1.amazonaws.com" # Replace with your API Gateway endpoint
-VITE_AWS_S3_BUCKET_NAME="file-searcher" # Replace with your S3 bucket name
-```
+| Variable | Description |
+| --- | --- |
+| `VITE_API_URL` | API Gateway base URL, e.g. `https://your-api-id.execute-api.us-east-1.amazonaws.com` |
+| `VITE_AWS_S3_BUCKET_NAME` | S3 bucket that receives uploaded documents |
 
-### 📬 Deployment
+## 📬 Deployment
 
-- Client: Deployed on AWS Amplify.
+- **Client:** AWS Amplify
+- **Backend:** Lambda, API Gateway, SQS, S3, DynamoDB, and OpenSearch
 
 - Backend: Deployed using AWS services (Lambda, API Gateway, SQS, S3, DynamoDB, OpenSearch).
